@@ -1,5 +1,5 @@
 from rest_framework import permissions
-"""IsAdminUser, IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly, IsModerator"""
+"""IsAdminUser, IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly, IsModerator, AllowAny"""
 
 # class ReadOnly(permissions.BasePermission):
 #     def has_permission(self, request, view):

@@ -12,7 +12,7 @@ json_data = {
 # algorithm "HS256" -> Symmetric Algorithm
 encode_data = jwt.encode(payload=json_data, \
                         key=SECRET_KEY, algorithm="HS256")
-print(encode_data) # print the encoded token
+print(type(encode_data)) # print the encoded token
 print(str(datetime.datetime.now().day))
 print(str(datetime.datetime.min.day))
 print(random.randint(1000000, 99999999))

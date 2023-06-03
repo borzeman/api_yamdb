@@ -1,6 +1,14 @@
 import datetime
 import random
 import jwt # import jwt library
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+token = os.getenv('SECRET_KEY')
+print(token)
+print(type(token))
+
 SECRET_KEY = "python_jwt"
 # json data to encode
 json_data = {

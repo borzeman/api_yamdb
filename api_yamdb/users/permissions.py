@@ -9,6 +9,9 @@ from rest_framework import permissions
 
 
 class IsModerator(permissions.BasePermission):
+    def has_permission(self, request, view):
+        print(request.user.role)
+        return True
     def has_object_permission(self, request, view, obj):
         return request.user.is_moderator
 

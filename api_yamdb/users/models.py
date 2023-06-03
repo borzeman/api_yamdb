@@ -31,9 +31,13 @@ class CustomUser(AbstractUser):
 
 
 class ConfirmCode(models.Model):
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         CustomUser,
         on_delete=models.CASCADE,
         related_name='confirmation_code',
+        unique=True
     )
     confirmation_code = models.CharField(blank=True, max_length=255)
+
+    def __str__(self) -> str:
+        return self.user.username

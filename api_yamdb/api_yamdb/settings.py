@@ -27,6 +27,8 @@ INSTALLED_APPS = [
     'api_yamdb',
     'django_filters',
     'users',
+    'api',
+    'artworks',
 ]
 
 AUTH_USER_MODEL = 'users.CustomUser'

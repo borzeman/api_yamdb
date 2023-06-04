@@ -14,7 +14,7 @@ SECRET_KEY = "python_jwt"
 json_data = {
     "sender": "CodeFires JWT",
     "message": "JWT is awesome.  You should try it!",
-    "date": str(datetime.datetime.now().day/7)
+    "date": str(datetime.datetime.now().se)
 }
 # encode the data with SECRET_KEY and 
 # algorithm "HS256" -> Symmetric Algorithm

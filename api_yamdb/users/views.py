@@ -5,15 +5,17 @@ import os
 from dotenv import load_dotenv
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, render
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import serializers, status
+from rest_framework import filters, mixins, serializers, status, viewsets
 
 from .models import CustomUser, ConfirmCode
-from .permissions import IsModerator
-from .serializers import TokenSerializer, UserSerializer
+from .permissions import AdminOnly, IsModerator, IsOwnerOrReadOnly
+from .serializers import CustomUserSerializer, TokenSerializer, UserSerializer
 
 load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
@@ -54,20 +56,25 @@ def get_token_for_user(user):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def signup(request):
+    email = request.data.get('email')
+    username = request.data.get('username')
     serializer = UserSerializer(data=request.data)
     if (CustomUser.objects.filter(
-        email=request.data.get('email'),
+        email=email,
         username=request.data.get('username')
     ).exists()):
         create_confirm_code(request.data)
-        return Response('You already have account. Message was sent, ' 
-            'check out you mail.', status=status.HTTP_201_CREATED)
-    if serializer.is_valid():
-
+        return Response(
+            'Message was sent, check out you mail.',
+            status=status.HTTP_200_OK)
+    if username == 'me':
+        return Response('Username не может быть "me".', status=status.HTTP_400_BAD_REQUEST)
+    if serializer.is_valid(raise_exception=True):
         serializer.save()
         create_confirm_code(serializer.data)
-        return Response("congrate", status=status.HTTP_201_CREATED)
-    return Response('You email or username is exist.', status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -86,3 +93,40 @@ def create_token(request):
         return Response(token, status=status.HTTP_200_OK)
     else:
         raise serializers.ValidationError('Something wrong.')
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    serializer_class = CustomUserSerializer
+    queryset = CustomUser.objects.all()
+    permission_classes = (AdminOnly,)
+    pagination_class = LimitOffsetPagination
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('username')
+    lookup_field = 'username'
+
+    @action(detail=False, methods=['get', 'patch'], url_path='me', permission_classes=[IsAuthenticated])
+    def me(self, request):
+        user = get_object_or_404(CustomUser, username=self.request.user)
+        if request.method == 'PATCH':
+            serializer = CustomUserSerializer(user, data=request.data, context={'request': request})
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = self.get_serializer(user)
+        return Response (serializer.data, status=status.HTTP_200_OK)
+
+
+class UserMeViewSet(
+    mixins.UpdateModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet
+):
+    serializer_class = CustomUserSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        qure = CustomUser.objects.all()
+        print(qure)
+        qureset = get_object_or_404(CustomUser, username=self.request.user)
+        print(123)
+        return qureset

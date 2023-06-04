@@ -7,13 +7,15 @@ from rest_framework import permissions
 #     def has_object_permission(self, request, view, obj):
 #         return request.method in permissions.SAFE_METHODS
 
+class AdminOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.role == 'Admin'
+    def has_object_permission(self, request, view, obj):
+        return request.user.role == 'Admin'
 
 class IsModerator(permissions.BasePermission):
-    def has_permission(self, request, view):
-        print(request.user.role)
-        return True
     def has_object_permission(self, request, view, obj):
-        return request.user.is_moderator
+        return request.user.role == 'Moderator'
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):

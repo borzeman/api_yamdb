@@ -5,9 +5,6 @@ from .models import CustomUser, ConfirmCode
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-<<<<<<< HEAD
-        fields = ('username', 'email')
-=======
         fields = ('username', 'email')
 
 
@@ -30,4 +27,3 @@ class CustomUserSerializer(serializers.ModelSerializer):
         if user.is_staff:
             return value
         return user.role
->>>>>>> auth

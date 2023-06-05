@@ -28,3 +28,4 @@ class CustomUserSerializer(serializers.ModelSerializer):
             return value
         return user.role
 
+

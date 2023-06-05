@@ -81,7 +81,8 @@ def signup(request):
 @permission_classes([AllowAny])
 def create_token(request):
     serializer = TokenSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
+    if not serializer.is_valid():
+        return Response('Username isn\'t correct.', status=status.HTTP_404_NOT_FOUND)
     user = serializer.validated_data.get('user')
     confirm_code = {
         'hash_code': serializer.validated_data.get('confirmation_code')}
@@ -92,7 +93,7 @@ def create_token(request):
         token = get_token_for_user(user)
         return Response(token, status=status.HTTP_200_OK)
     else:
-        raise serializers.ValidationError('Something wrong.')
+        return Response('Something wrong.', status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -100,33 +101,22 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     permission_classes = (AdminOnly,)
     pagination_class = LimitOffsetPagination
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    search_fields = ('username')
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
     lookup_field = 'username'
 
-    @action(detail=False, methods=['get', 'patch'], url_path='me', permission_classes=[IsAuthenticated])
+    def update(self, request, *args, **kwargs):
+        if request.method == 'PUT':
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super().update(request, *args, **kwargs)
+
+    @action(detail=False, methods=['get', 'patch'], url_path='me', permission_classes=[IsAuthenticated,])
     def me(self, request):
         user = get_object_or_404(CustomUser, username=self.request.user)
-        if request.method == 'PATCH':
-            serializer = CustomUserSerializer(user, data=request.data, context={'request': request})
-            if serializer.is_valid(raise_exception=True):
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-        serializer = self.get_serializer(user)
-        return Response (serializer.data, status=status.HTTP_200_OK)
-
-
-class UserMeViewSet(
-    mixins.UpdateModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet
-):
-    serializer_class = CustomUserSerializer
-    permission_classes = (IsAuthenticated,)
-
-    def get_queryset(self):
-        qure = CustomUser.objects.all()
-        print(qure)
-        qureset = get_object_or_404(CustomUser, username=self.request.user)
-        print(123)
-        return qureset
+        if request.method == 'GET':
+            serializer = self.get_serializer(user)
+            return Response (serializer.data, status=status.HTTP_200_OK)
+        serializer = CustomUserSerializer(user, data=request.data, context={'request': request}, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)

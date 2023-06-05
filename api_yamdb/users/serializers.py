@@ -24,6 +24,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     def validate_role(self, value):
         user = self.context.get("request").user
-        if user.is_staff:
+        if user.role == 'admin':
             return value
         return user.role
+

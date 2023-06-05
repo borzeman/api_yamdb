@@ -14,15 +14,15 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import filters, mixins, serializers, status, viewsets
 
 from users.models import CustomUser, ConfirmCode
-from artworks.models import Category, Genre, Artwork, Comment, Review
-from .permissions import AdminOnly, IsModerator, IsOwnerOrReadOnly
+from artworks.models import Category, Genre, Title, Comment, Review
+from .permissions import AdminOnly, IsOwnerOrReadOnly, ReadOnly
 from .serializers import (
     CustomUserSerializer, 
     TokenSerializer, 
     UserSerializer,
     CategorySerializer,
     GenreSerializer,
-    ArtworkSerializer,
+    TitleSerializer,
     ReviewSerializer,
     CommentSerializer,
 )
@@ -137,29 +137,66 @@ class UserMeViewSet(
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        qure = CustomUser.objects.all()
-        print(qure)
-        qureset = get_object_or_404(CustomUser, username=self.request.user)
+        query = CustomUser.objects.all()
+        print(query)
+        queryset = get_object_or_404(CustomUser, username=self.request.user)
         print(123)
-        return qureset
+        return queryset
+
+class UserMeViewSet(
+    mixins.UpdateModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet
+):
+    serializer_class = CustomUserSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        query = CustomUser.objects.all()
+        print(query)
+        queryset = get_object_or_404(CustomUser, username=self.request.user)
+        return queryset
 
 
 # Кирилл
 
-class ArtworkViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAdminUser]
-    queryset = Artwork.objects.all()
-    serializer_class = ArtworkSerializer
-
-class CategoryViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAdminUser]
+class CategoryViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
+    permission_classes = [ReadOnly|AdminOnly]
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    pagination_class = LimitOffsetPagination
+    filter_backends = (filters.SearchFilter, )
+    lookup_field = 'slug'
+    search_fields = ('name',)
 
 class GenreViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAdminUser]
+    permission_classes = [ReadOnly, ]
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+
+class TitleViewSet(viewsets.ModelViewSet):
+    permission_classes = [ReadOnly, ]
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+
+    def get_queryset(self):
+        queryset = self.queryset
+        category = self.request.query_params.get('category')
+        genre = self.request.query_params.get('genre')
+        name = self.request.query_params.get('name')
+        year = self.request.query_params.get('year')
+
+        if category:
+            queryset = queryset.filter(category__slug=category)
+        if genre:
+            queryset = queryset.filter(genre__slug=genre)
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+        if year:
+            queryset = queryset.filter(year=year)
+
+        return queryset
+
 
 class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
@@ -185,17 +222,3 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         review_id = self.kwargs['review_id']
         serializer.save(author=self.request.user, review_id=review_id)
-
-class UserMeViewSet(
-    mixins.UpdateModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet
-):
-    serializer_class = CustomUserSerializer
-    permission_classes = (IsAuthenticated,)
-
-    def get_queryset(self):
-        qure = CustomUser.objects.all()
-        print(qure)
-        qureset = get_object_or_404(CustomUser, username=self.request.user)
-        return qureset

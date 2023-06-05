@@ -29,26 +29,6 @@ class CustomUser(AbstractUser):
     def has_perm(self, perm, obj=None):
         return self.is_staff
 
-# def role_post_save(sender, instance, created, *args, **kwargs):
-#     if not instance.is_staff and instance.role == 'Admin':
-#         instance.is_staff = True
-#         instance.save()
-    
-#     if instance.is_staff and instance.role != 'Admin':
-#         instance.is_staff = False
-#         instance.save()
-        
-#     if instance.is_superuser and instance.role != 'Admin':
-#         instance.role = 'Admin'
-#         instance.is_staff = True
-#         instance.save()
-
-    
-
-
-# post_save.connect(role_post_save, sender=CustomUser)
-
-
 class ConfirmCode(models.Model):
     user = models.OneToOneField(
         CustomUser,

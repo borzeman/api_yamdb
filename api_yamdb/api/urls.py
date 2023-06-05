@@ -5,11 +5,10 @@ from .views import (
     signup,
     CategoryViewSet,
     GenreViewSet,
-    ArtworkViewSet,
+    TitleViewSet,
     ReviewViewSet,
     CommentViewSet,
     UserViewSet,
-    UserMeViewSet,
 )
 
 app_name = 'api'
@@ -17,7 +16,7 @@ router = routers.DefaultRouter()
 router.register('users', UserViewSet, basename='users')
 router.register('categories', CategoryViewSet, basename='categories')
 router.register('genres', GenreViewSet, basename='genres')
-router.register('titles', ArtworkViewSet, basename='titles')
+router.register('titles', TitleViewSet, basename='titles')
 
 review_router = routers.DefaultRouter()
 review_router.register(r'reviews', ReviewViewSet, basename='reviews')
@@ -31,5 +30,4 @@ urlpatterns = [
     path('', include(router.urls)),
     path('titles/<int:title_id>/', include(review_router.urls)),
     path('titles/<int:title_id>/', include(comment_router.urls)),
-    path('users/me/', UserMeViewSet.as_view(actions={'get': 'retrieve', 'put': 'update'}), name='user_me'),
 ]

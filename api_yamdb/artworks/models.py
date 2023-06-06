@@ -30,7 +30,7 @@ class Title(models.Model):
     def __str__(self):
         return self.name
 
-    
+
 class AuthorTextModel(models.Model):
     text = models.TextField(verbose_name='Текст отзыва')
     author = models.ForeignKey(
@@ -75,10 +75,10 @@ class Comment(AuthorTextModel):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
-        verbose_name='отзыв',
+        verbose_name='Отзыв',
     )
 
     class Meta:
-        verbose_name = 'комментарий'
-        verbose_name_plural = 'комментарии'
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
         default_related_name = 'comments'

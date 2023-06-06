@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import CustomUser, ConfirmCode
+from .models import ConfirmCode, CustomUser
 
 
 class UserSerializer(serializers.ModelSerializer):

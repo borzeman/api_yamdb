@@ -1,18 +1,18 @@
-import jwt
-import time
 import os
+import time
 
-from dotenv import load_dotenv
+import jwt
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
+from dotenv import load_dotenv
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import filters, status, viewsets
 
-from .models import CustomUser, ConfirmCode
+from .models import ConfirmCode, CustomUser
 from .permissions import AdminOnly
 from .serializers import CustomUserSerializer, TokenSerializer, UserSerializer
 
@@ -66,7 +66,7 @@ def signup(request):
         )
     if (CustomUser.objects.filter(
         email=email,
-        username=request.data.get('username')
+        username=username
     ).exists()):
         create_confirm_code(request.data)
         return Response(

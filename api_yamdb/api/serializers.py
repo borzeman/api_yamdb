@@ -1,3 +1,5 @@
+from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from artworks.models import Category, Genre, Title, Review, Comment
 from users.models import CustomUser, ConfirmCode
@@ -49,18 +51,34 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
         fields = ('id', 'name', 'category', 'genre', 'year')
 
-class ReviewSerializer(serializers.ModelSerializer):
-    author = CustomUserSerializer()
-    title = TitleSerializer()
-
-    class Meta:
-        model = Review
-        fields = ('id', 'text', 'author', 'pub_date', 'title', 'score')
-
 class CommentSerializer(serializers.ModelSerializer):
-    author = CustomUserSerializer()
-    review = ReviewSerializer()
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True,
+    )
 
     class Meta:
         model = Comment
-        fields = ('id', 'text', 'author', 'pub_date', 'review')
+        fields = ('id', 'text', 'author', 'pub_date')
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True,
+    )
+
+    class Meta:
+        model = Review
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
+
+    def validate(self, data):
+        request = self.context['request']
+        if request.method == 'POST':
+            author = request.user
+            title_id = self.context.get('view').kwargs.get('title_id')
+            title = get_object_or_404(Title, pk=title_id)
+            if Review.objects.filter(title=title, author=author).exists():
+                raise ValidationError(
+                    'Нельзя оставить повторный отзыв')
+        return data

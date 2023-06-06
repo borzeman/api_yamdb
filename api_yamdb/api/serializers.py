@@ -38,18 +38,19 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 class GenreSerializer(serializers.ModelSerializer):
-    genre = serializers.SlugRelatedField(slug_field='name', many=True, read_only=True)
     class Meta:
         model = Genre
-        fields = ('id', 'name', 'genre')
+        fields = ('name', 'slug')
+
 
 class TitleSerializer(serializers.ModelSerializer):
-    category = CategorySerializer()
-    genre = GenreSerializer()
-
+    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(read_only=True)
     class Meta:
         model = Title
-        fields = ('id', 'name', 'category', 'genre', 'year')
+        fields = ('id', 'name', 'category', 'genre', 'year', 'description')
+        read_only_fields = ['id', ]
+
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(

@@ -27,7 +27,6 @@ from .serializers import (
     CommentSerializer,
 )
 
-# Макс
 
 load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
@@ -158,10 +157,9 @@ class UserMeViewSet(
         return queryset
 
 
-# Кирилл
-
 class CategoryViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
     permission_classes = [ReadOnly|AdminOnly]
+    #permission_classes = [AllowAny, ]
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     pagination_class = LimitOffsetPagination
@@ -169,34 +167,25 @@ class CategoryViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, mixins.
     lookup_field = 'slug'
     search_fields = ('name',)
 
-class GenreViewSet(viewsets.ModelViewSet):
-    permission_classes = [ReadOnly, ]
+class GenreViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
+    permission_classes = [ReadOnly|AdminOnly]
+    #permission_classes = [AllowAny, ]
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    filter_backends = (filters.SearchFilter, )
+    pagination_class = LimitOffsetPagination
+    lookup_field = 'slug'
+    search_fields = ('name',)
 
 class TitleViewSet(viewsets.ModelViewSet):
-    permission_classes = [ReadOnly, ]
+    permission_classes = [ReadOnly|AdminOnly]
+    #permission_classes = [AllowAny, ]
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-
-    def get_queryset(self):
-        queryset = self.queryset
-        category = self.request.query_params.get('category')
-        genre = self.request.query_params.get('genre')
-        name = self.request.query_params.get('name')
-        year = self.request.query_params.get('year')
-
-        if category:
-            queryset = queryset.filter(category__slug=category)
-        if genre:
-            queryset = queryset.filter(genre__slug=genre)
-        if name:
-            queryset = queryset.filter(name__icontains=name)
-        if year:
-            queryset = queryset.filter(year=year)
-
-        return queryset
-
+    pagination_class = LimitOffsetPagination
+    filter_backends = (filters.SearchFilter, )
+    search_fields = ('name',)
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -216,7 +205,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
         serializer.save(
             author=self.request.user, title=self.get_title()
         )
-
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer

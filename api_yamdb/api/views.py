@@ -15,7 +15,7 @@ from rest_framework import filters, mixins, serializers, status, viewsets
 
 from users.models import CustomUser, ConfirmCode
 from artworks.models import Category, Genre, Title, Comment, Review
-from .permissions import AdminOnly, IsOwnerOrReadOnly, ReadOnly
+from .permissions import AdminOnly, IsOwnerOrReadOnly, ReadOnly, IsAuthorAdminModerator, IsModerator
 from .serializers import (
     CustomUserSerializer,
     TokenSerializer,
@@ -190,7 +190,8 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+    pagination_class = PageNumberPagination
+    permission_classes = [IsAuthorAdminModerator|ReadOnly|AdminOnly]
 
     def get_title(self):
         return get_object_or_404(
@@ -209,7 +210,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     pagination_class = PageNumberPagination
-    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+    permission_classes = [IsAuthorAdminModerator|ReadOnly|AdminOnly]
 
     def get_review(self):
         return get_object_or_404(

@@ -1,7 +1,8 @@
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from artworks.models import Category, Genre, Title, Review, Comment
+from artworks.models import Category, Genre, Title
+from review.models import Review, Comment
 from users.models import CustomUser, ConfirmCode
 
 

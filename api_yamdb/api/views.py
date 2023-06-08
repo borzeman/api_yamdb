@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, render
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
-from django_filters import rest_framework as filterz
 import django_filters
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
@@ -16,7 +15,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import filters, mixins, serializers, status, viewsets
 
 from users.models import CustomUser, ConfirmCode
-from artworks.models import Category, Genre, Title, Comment, Review
+from artworks.models import Category, Genre, Title
+from review.models import Comment, Review
 from .permissions import AdminOnly, IsOwnerOrReadOnly, ReadOnly, IsAuthorAdminModerator, IsModerator
 from .serializers import (
     CustomUserSerializer,
@@ -200,15 +200,6 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     http_method_names = ['get', 'post', 'patch', 'delete']
 
-# class TitleViewSet(viewsets.ModelViewSet):
-#     permission_classes = [ReadOnly|AdminOnly]
-#     #permission_classes = [AllowAny, ]
-#     queryset = Title.objects.all()
-#     serializer_class = TitleSerializer
-#     pagination_class = LimitOffsetPagination
-#     filter_backends = (filters.SearchFilter, )
-#     search_fields = ('name',)
-#     http_method_names = ('get', 'post', 'patch', 'delete')
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer

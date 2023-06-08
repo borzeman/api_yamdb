@@ -26,7 +26,9 @@ INSTALLED_APPS = [
     'django_filters',
     'users',
     'api',
+    'review',
     'artworks',
+
 ]
 
 AUTH_USER_MODEL = 'users.CustomUser'

@@ -1,5 +1,4 @@
 from django.contrib.auth.models import AbstractUser
-from django.db.models.signals import m2m_changed, post_save
 from django.db import models
 
 ROLE = (
@@ -7,6 +6,7 @@ ROLE = (
     ('moderator', 'moderator'),
     ('admin', 'admin')
 )
+
 
 class CustomUser(AbstractUser):
     password = models.CharField(blank=True, max_length=254)
@@ -21,13 +21,11 @@ class CustomUser(AbstractUser):
         return self.username
 
 
-
 class ConfirmCode(models.Model):
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='confirmation_code',
-        unique=True,
+        related_name='confirmation_code'
     )
     confirmation_code = models.CharField(max_length=255)
 

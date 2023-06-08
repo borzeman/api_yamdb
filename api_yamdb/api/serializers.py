@@ -93,13 +93,13 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date')
 
-    def validate(self, data):
-        request = self.context['request']
-        if request.method == 'POST':
-            author = request.user
-            title_id = self.context.get('view').kwargs.get('title_id')
-            title = get_object_or_404(Title, pk=title_id)
-            if Review.objects.filter(title=title, author=author).exists():
-                raise ValidationError(
-                    'Нельзя оставить повторный отзыв')
-        return data
+    def validate(self, attrs):
+        if self.context['request'].method == 'POST':
+            if Review.objects.filter(
+                title_id=self.context['view'].kwargs.get('title_id'),
+                author=self.context['request'].user,
+            ).exists():
+                raise serializers.ValidationError(
+                    'Попытка оставить повторный отзыв',
+                )
+        return attrs

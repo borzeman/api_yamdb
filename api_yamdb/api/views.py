@@ -5,7 +5,9 @@ import os
 from dotenv import load_dotenv
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, render
-from django_filters.rest_framework import DjangoFilterBackend
+from django_filters.rest_framework import DjangoFilterBackend, FilterSet
+from django_filters import rest_framework as filterz
+import django_filters
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
@@ -177,16 +179,36 @@ class GenreViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, mixins.Lis
     lookup_field = 'slug'
     search_fields = ('name',)
 
+class TitleFilter(FilterSet):
+    genre = django_filters.CharFilter(field_name='genre__slug', lookup_expr='exact')
+    category = django_filters.CharFilter(field_name='category__slug', lookup_expr='exact')
+    class Meta:
+        model = Title
+        fields = {
+            'name': ['exact', 'icontains'],
+            'year': ['exact', 'gte', 'lte'],
+        }
+
 class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = [ReadOnly|AdminOnly]
     #permission_classes = [AllowAny, ]
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     pagination_class = LimitOffsetPagination
-    filter_backends = (filters.SearchFilter, )
-    search_fields = ('name',)
-    http_method_names = ('get', 'post', 'patch', 'delete')
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TitleFilter
 
+    http_method_names = ['get', 'post', 'patch', 'delete']
+
+# class TitleViewSet(viewsets.ModelViewSet):
+#     permission_classes = [ReadOnly|AdminOnly]
+#     #permission_classes = [AllowAny, ]
+#     queryset = Title.objects.all()
+#     serializer_class = TitleSerializer
+#     pagination_class = LimitOffsetPagination
+#     filter_backends = (filters.SearchFilter, )
+#     search_fields = ('name',)
+#     http_method_names = ('get', 'post', 'patch', 'delete')
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer

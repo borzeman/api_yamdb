@@ -23,8 +23,8 @@ class Title(models.Model):
     name = models.CharField(max_length=255)
     year = models.IntegerField(validators=[MaxValueValidator(timezone.now().year)])
     description = models.TextField()
-    genre = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+    genre = models.ManyToManyField(Genre, blank=True)
+    category = models.ForeignKey(Category, related_name='titles', on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.name

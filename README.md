@@ -48,7 +48,7 @@
 ### *Запуск проекта*
 - Клонировать репозиторий и далее перейти в него
 ```
-source venv/Scripts/activate
+git clone git@github.com:borzeman/api_yamdb.git
 ```
 - Установите и активируйте виртуальное окружение
 ```

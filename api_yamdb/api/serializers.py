@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from rest_framework import serializers
 
 from artworks.models import Category, Genre, Title
@@ -58,10 +59,12 @@ class TitleSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         slug_field='slug', queryset=Genre.objects.all(), many=True
     )
+    rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'category', 'genre', 'year', 'description')
+        fields = ('id', 'name', 'category', 'genre', 'year', 'description',
+                  'rating',)
         read_only_fields = ['id', ]
 
     def to_representation(self, instance):
@@ -78,6 +81,17 @@ class TitleSerializer(serializers.ModelSerializer):
             for genre in instance.genre.all()
         ]
         return representation
+
+    def get_rating(self, obj):
+        rating = (
+            obj.reviews.filter(title=obj)
+            .aggregate(Avg('score'))
+            ['score__avg']
+        )
+        if rating:
+            return int(rating)
+        else:
+            return None
 
 
 class CommentSerializer(serializers.ModelSerializer):

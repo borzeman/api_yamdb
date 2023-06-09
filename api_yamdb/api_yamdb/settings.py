@@ -22,6 +22,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'djangorestframework',
+    'djangorestframework-simplejwt',
     'api_yamdb',
     'django_filters',
     'users',

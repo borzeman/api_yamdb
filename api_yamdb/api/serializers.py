@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from artworks.models import Category, Genre, Title
-from review.models import Review, Comment
+from reviews.models import Review, Comment
 from users.models import CustomUser, ConfirmCode
 
 
@@ -13,22 +13,28 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class TokenSerializer(serializers.ModelSerializer):
-    user = serializers.SlugRelatedField(
+    username = serializers.SlugRelatedField(
         slug_field='username',
         queryset=CustomUser.objects.all())
     class Meta:
         model = ConfirmCode
-        fields = ('user', 'confirmation_code')
+        fields = ('username', 'confirmation_code')
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role')
 
     def validate_role(self, value):
         user = self.context.get("request").user
-        if user.is_staff:
+        if user.role == 'admin':
             return value
         return user.role
 

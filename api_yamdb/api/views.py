@@ -120,7 +120,7 @@ class UserViewSet(viewsets.ModelViewSet):
         detail=False,
         methods=['get', 'patch'],
         url_path='me',
-        permission_classes=[IsAuthenticated,]
+        permission_classes=[IsAuthenticated, ]
     )
     def me(self, request):
         user = get_object_or_404(CustomUser, username=self.request.user)

@@ -1,38 +1,29 @@
-import jwt
 import time
-import os
 
-from dotenv import load_dotenv
+import django_filters
+import jwt
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
-import django_filters
+from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action, api_view
-from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
-from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
+from rest_framework.pagination import (LimitOffsetPagination,
+                                       PageNumberPagination)
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import filters, mixins, serializers, status, viewsets
 
-from users.models import CustomUser, ConfirmCode
+from api_yamdb.settings import SECRET_KEY
 from artworks.models import Category, Genre, Title
-from reviews.models import Comment, Review
-from .permissions import AdminOnly, IsOwnerOrReadOnly, ReadOnly, IsAuthorAdminModerator, IsModerator
-from .serializers import (
-    CustomUserSerializer,
-    TokenSerializer,
-    UserSerializer,
-    CategorySerializer,
-    GenreSerializer,
-    TitleSerializer,
-    ReviewSerializer,
-    CommentSerializer,
-)
+from reviews.models import Review
+from users.models import ConfirmCode, CustomUser
 
+from .permissions import AdminOnly, IsAuthorOrModerator, ReadOnly
+from .serializers import (CategorySerializer, CommentSerializer,
+                          CustomUserSerializer, GenreSerializer,
+                          ReviewSerializer, TitleSerializer, TokenSerializer,
+                          UserSerializer)
 
-load_dotenv()
-# SECRET_KEY = os.getenv('SECRET_KEY')
-SECRET_KEY = 'rjnfijrnfkslmf3f234'
 
 def create_confirm_code(data: dict) -> None:
     dict_data = {
@@ -147,9 +138,13 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class CategoryViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
-    permission_classes = [ReadOnly|AdminOnly]
-    #permission_classes = [AllowAny, ]
+class CategoryViewSet(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet
+):
+    permission_classes = [ReadOnly | AdminOnly]
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     pagination_class = LimitOffsetPagination
@@ -157,9 +152,14 @@ class CategoryViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, mixins.
     lookup_field = 'slug'
     search_fields = ('name',)
 
-class GenreViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
-    permission_classes = [ReadOnly|AdminOnly]
-    #permission_classes = [AllowAny, ]
+
+class GenreViewSet(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet
+):
+    permission_classes = [ReadOnly | AdminOnly]
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter, )
@@ -167,9 +167,17 @@ class GenreViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, mixins.Lis
     lookup_field = 'slug'
     search_fields = ('name',)
 
+
 class TitleFilter(FilterSet):
-    genre = django_filters.CharFilter(field_name='genre__slug', lookup_expr='exact')
-    category = django_filters.CharFilter(field_name='category__slug', lookup_expr='exact')
+    genre = django_filters.CharFilter(
+        field_name='genre__slug',
+        lookup_expr='exact'
+    )
+    category = django_filters.CharFilter(
+        field_name='category__slug',
+        lookup_expr='exact'
+    )
+
     class Meta:
         model = Title
         fields = {
@@ -177,9 +185,9 @@ class TitleFilter(FilterSet):
             'year': ['exact', 'gte', 'lte'],
         }
 
+
 class TitleViewSet(viewsets.ModelViewSet):
-    permission_classes = [ReadOnly|AdminOnly]
-    #permission_classes = [AllowAny, ]
+    permission_classes = [ReadOnly | AdminOnly]
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     pagination_class = LimitOffsetPagination
@@ -192,7 +200,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     pagination_class = PageNumberPagination
-    permission_classes = [IsAuthorAdminModerator|ReadOnly|AdminOnly]
+    permission_classes = [IsAuthorOrModerator | ReadOnly | AdminOnly]
 
     def get_title(self):
         return get_object_or_404(
@@ -208,10 +216,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
             author=self.request.user, title=self.get_title()
         )
 
+
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     pagination_class = PageNumberPagination
-    permission_classes = [IsAuthorAdminModerator|ReadOnly|AdminOnly]
+    permission_classes = [IsAuthorOrModerator | ReadOnly | AdminOnly]
 
     def get_review(self):
         return get_object_or_404(

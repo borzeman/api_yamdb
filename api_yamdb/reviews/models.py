@@ -1,7 +1,9 @@
-from django.db import models
-from users.models import CustomUser
-from artworks.models import Title
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
+
+from artworks.models import Title
+from users.models import CustomUser
+
 
 class AuthorTextModel(models.Model):
     text = models.TextField(verbose_name='Текст отзыва')

@@ -1,9 +1,8 @@
-from django.core.exceptions import ValidationError
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+
 from artworks.models import Category, Genre, Title
-from reviews.models import Review, Comment
-from users.models import CustomUser, ConfirmCode
+from reviews.models import Comment, Review
+from users.models import ConfirmCode, CustomUser
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -16,6 +15,7 @@ class TokenSerializer(serializers.ModelSerializer):
     username = serializers.SlugRelatedField(
         slug_field='username',
         queryset=CustomUser.objects.all())
+
     class Meta:
         model = ConfirmCode
         fields = ('username', 'confirmation_code')
@@ -44,6 +44,7 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ('name', 'slug')
 
+
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
@@ -62,7 +63,7 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
         fields = ('id', 'name', 'category', 'genre', 'year', 'description')
         read_only_fields = ['id', ]
-    
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['category'] = {

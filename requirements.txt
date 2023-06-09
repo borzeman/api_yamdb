@@ -1,4 +1,3 @@
-ijsnfgjsnfjsdofnsdof
 requests==2.26.0
 Django==3.2
 django-filter==23.2

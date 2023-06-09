@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'djangorestframework',
+    'rest_framework',
     'djangorestframework-simplejwt',
     'api_yamdb',
     'django_filters',

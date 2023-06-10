@@ -70,8 +70,8 @@ def signup(request):
             status=status.HTTP_400_BAD_REQUEST
         )
     if (CustomUser.objects.filter(
-        email=email,
-        username=username
+        email__iexact=email,
+        username__iexact=username
     ).exists()):
         create_confirm_code(request.data)
         return Response(
@@ -88,13 +88,14 @@ def signup(request):
 def create_token(request):
     serializer = TokenSerializer(data=request.data)
     if not serializer.is_valid():
+        print(serializer.data.get('username'))
         if serializer.data.get('username') is not None:
             return Response(
                 'Username doesn\'t exist.',
                 status=status.HTTP_404_NOT_FOUND
             )
-        serializer.is_valid(raise_exception=True)
-    user = serializer.validated_data.get('user')
+    serializer.is_valid(raise_exception=True)
+    user = serializer.validated_data.get('username')
     confirm_code = {
         'hash_code': serializer.validated_data.get('confirmation_code')}
     if ConfirmCode.objects.filter(

@@ -1,14 +1,14 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.conf import settings
 
 from artworks.models import Title
-from users.models import CustomUser
 
 
 class AuthorTextModel(models.Model):
     text = models.TextField(verbose_name='Текст отзыва')
     author = models.ForeignKey(
-        CustomUser,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         verbose_name='Автор',
     )
@@ -18,7 +18,7 @@ class AuthorTextModel(models.Model):
         abstract = True
         ordering = ('pub_date',)
 
-    def str(self):
+    def __str__(self):
         return self.text
 
 

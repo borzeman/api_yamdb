@@ -19,10 +19,14 @@ class Genre(models.Model):
         return self.name
 
 
+def current_year():
+    return timezone.now().year
+
+
 class Title(models.Model):
     name = models.CharField(max_length=255)
-    year = models.IntegerField(
-        validators=[MaxValueValidator(timezone.now().year)]
+    year = models.PositiveIntegerField(
+        validators=[MaxValueValidator(current_year)]
     )
     description = models.TextField()
     genre = models.ManyToManyField(Genre, blank=True)

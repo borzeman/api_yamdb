@@ -36,7 +36,7 @@ class CustomUser(AbstractUser):
 
     def clean(self):
         super().clean()
-        if self.username.upper() != self.username:
+        if self.username.upper() == self.username:
             raise ValidationError("Нет верхнему регистру!")
         if self.username.lower() == 'me':
             raise ValidationError("username != 'me'", code=400)
